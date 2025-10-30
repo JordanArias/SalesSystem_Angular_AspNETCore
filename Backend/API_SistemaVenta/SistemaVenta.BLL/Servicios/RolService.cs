@@ -12,7 +12,7 @@ using SistemaVenta.Model;
 
 namespace SistemaVenta.BLL.Servicios
 {
-    internal class RolService : IRolService
+    public class RolService : IRolService
     {
         private readonly IGenericRepository<Rol> _rolRepositorio;
         private readonly IMapper _mapper;
