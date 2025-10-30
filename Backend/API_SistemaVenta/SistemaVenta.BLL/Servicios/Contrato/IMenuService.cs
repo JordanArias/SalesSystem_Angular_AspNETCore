@@ -8,8 +8,9 @@ using SistemaVenta.DTO;
 
 namespace SistemaVenta.BLL.Servicios.Contrato
 {
-    public interface IDashBoardService
+    public interface IMenuService
     {
-        Task<DashboardDTO> Resumen(); // Método para obtener la lista Dasboard
+
+        Task<List<MenuDTO>> Lista(int idUsuario);// Devuelve una lista de objetos DashboardDTO
     }
 }

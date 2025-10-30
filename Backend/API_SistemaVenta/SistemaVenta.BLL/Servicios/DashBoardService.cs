@@ -134,14 +134,22 @@ namespace SistemaVenta.BLL.Servicios
                 resultado = tablaventa
                     // Agrupa las ventas por el día de la fecha de registro.
                     // "v" es cada venta; "v.FechaRegistro.Value.Date" obtiene solo la parte de la fecha (sin la hora).
-                    .GroupBy(v => v.FechaRegistro.Value.Date)
-                    // Ordena los grupos por la fecha del grupo (la clave de agrupación).
-                    // g.Key representa la fecha de cada grupo.
-                    .OrderBy(g => g.Key)
+                    .GroupBy(v => v.FechaRegistro.Value.Date)/* =  g.Key(fecha) |  Elementos dentro del grupo(g)
+                                                                    2025-10-20  |    [Venta 1, Venta 2]
+                                                                    2025-10-21  |    [Venta 3, Venta 4]
+                                                                    2025-10-22  |    [Venta 5]               */
+
+                    // Solo Ordena los grupos por la fecha del grupo (la clave de agrupación), g.Key representa la fecha de cada grupo.
+                    .OrderBy(g => g.Key) // g.Key se vuelve key que es la fecha
+
+
                     // Crea una proyección (un nuevo objeto) con dos campos:
                     // "fecha": la fecha del grupo convertida a texto con formato "dd/MM/yyyy"
                     // "total": la cantidad de ventas en ese día (se usa Count() para contarlas)
-                    .Select(dv => new { fecha = dv.Key.ToString("dd/MM/yyyy"), total = dv.Count() })
+                    .Select(dv => new { fecha = dv.Key.ToString("dd/MM/yyyy"), total = dv.Count() })/* =  (fecha)dv.Key | (total)Elementos dentro del grupo(dv)
+                                                                                                           2025-10-20   |    2
+                                                                                                           2025-10-21   |    2
+                                                                                                           2025-10-22   |    1            */
                     // Convierte la lista de objetos en un diccionario:
                     //  - La clave del diccionario será la fecha (r.fecha)
                     //  - El valor será el total de ventas (r.total)
@@ -158,28 +166,55 @@ namespace SistemaVenta.BLL.Servicios
             return resultado;
         }
 
+
+        //************************************************************************************************************
+        //************************************************* RESUMEN **************************************************
+        //************************************************************************************************************
         public async Task<DashboardDTO> Resumen()
         {
-            DashboardDTO vmDahsBoard = new DashboardDTO();
+            DashboardDTO vmDahsBoard = new DashboardDTO(); // Instancia un nuevo objeto DashboardDTO para almacenar el resumen
 
             try
             {
-                vmDahsBoard.TotalVentas = await TotalVentasUltimaSemana();
+                vmDahsBoard.TotalVentas = await TotalVentasUltimaSemana(); 
                 vmDahsBoard.TotalIngresos = await TotalIngresosUltimaSemana();
                 vmDahsBoard.TotalProductos = await TotalProductos();
 
-                List<VentaSemanaDTO> listaVentaSemana = new List<VentaSemanaDTO>();
+                List<VentaSemanaDTO> listaVentaSemana = new List<VentaSemanaDTO>(); // Lista para almacenar las ventas de la ultima semana
+
+               /* Recorre el diccionario de ventas de la ultima semana y lo convierte en una lista de VentaSemanaDTO
+                  - Un Dictionary : es la colección completa, una colección de varios KeyValuePair.
+                  - Cada KeyValuePair : representa cada elemento dentro del diccionario, que tiene una clave (Key) y un valor (Value).
+                    Ejemplo:
+                    | KeyValuePair | Key (string) | Value (int) |
+                    | ------------ | ------------ | ----------- |
+                    | 1            | "20/10/2025" | 5           |
+                    | 2            | "21/10/2025" | 7           |
+                    | 3            | "22/10/2025" | 3           |           */
 
                 foreach (KeyValuePair<string, int> item in await VentasUltimaSemana())
                 {
+                    // Cada par (clave, valor) representa:
+                    //    - Key: la fecha
+                    //    - Value: el total de ventas de ese día
 
-                    listaVentaSemana.Add(new VentaSemanaDTO()
+                    // Dentro del foreach, "item" representa cada elemento del diccionario (KeyValuePair)
+                    // Ejemplo: item.Key = "20/10/2025", item.Value = 5
+
+                    listaVentaSemana.Add(new VentaSemanaDTO() // Se crea un nuevo objeto VentaSemanaDTO con esos datos y se agrega a la lista
                     {
-                        Fecha = item.Key,
-                        Total = item.Value
+                        Fecha = item.Key,  // Ejemplo: "20/10/2025"
+                        Total = item.Value // Ejemplo: 5
 
                     });
                 }
+
+                // Asigna la lista de ventas semanales al objeto del Dashboard
+                // Ahora vmDashboard tiene:
+                //    - TotalVentas
+                //    - TotalIngresos
+                //    - TotalProductos
+                //    - VentasUltimaSemana (lista de objetos con fecha y total)
                 vmDahsBoard.VentasUltimaSemana = listaVentaSemana;
                 
             }
@@ -187,7 +222,9 @@ namespace SistemaVenta.BLL.Servicios
             {
                 throw;
             }
+
             return vmDahsBoard;
         }
+
     }
 }

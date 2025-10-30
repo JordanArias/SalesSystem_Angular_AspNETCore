@@ -14,6 +14,8 @@ using SistemaVenta.DAL.Repositorios;
 
 //REFERENCIA A UTILITIES PARA AUTO MAPPER
 using SistemaVenta.Utility;
+using SistemaVenta.BLL.Servicios.Contrato;
+using SistemaVenta.BLL.Servicios;
 
 // Archivo: Dependencia.cs
 // Propósito:
@@ -46,6 +48,16 @@ namespace SistemaVenta.IOC
 
             //INYECTAR AUTOMAPPER DE UTILITY
             services.AddAutoMapper(typeof(AutoMapperProfile)); //Registrar el perfil de AutoMapper para mapeo de objetos
+
+
+            //INYECTAR LOS SERVICIOS DE BLL
+            services.AddScoped<IRolService, RolService>(); // Servicio para manejar roles
+            services.AddScoped<IUsuarioService, UsuarioService>();
+            services.AddScoped<ICategoriaService, CategoriaService>();
+            services.AddScoped<IProductoService, ProductoService>(); 
+            services.AddScoped<IVentaService, VentaService>();
+            services.AddScoped<IDashBoardService, DashBoardService>(); 
+            services.AddScoped<IMenuService, MenuService>(); 
         }
 
     }
